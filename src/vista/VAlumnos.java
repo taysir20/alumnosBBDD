@@ -45,6 +45,9 @@ public class VAlumnos extends JFrame implements Vista {
 	private JComboBox comboBoxNacionalidad;
 	private JButton btnBorrar;
 	private JButton btnActualizar;
+	private JButton btnCopiarAUn;
+	private JButton btnBorrarTodo;
+	private JButton btnSubirDelFichero;
 
 	public JTable getTable() {
 		return table;
@@ -101,7 +104,7 @@ public class VAlumnos extends JFrame implements Vista {
 		setResizable(false);
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 623, 538);
+		setBounds(100, 100, 650, 538);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -160,6 +163,27 @@ public class VAlumnos extends JFrame implements Vista {
 		
 		comboBoxNacionalidad = new JComboBox();
 		comboBoxNacionalidad.setModel(new DefaultComboBoxModel(new String[] {"ESPA\u00D1OLA", "OTRO"}));
+		
+		btnCopiarAUn = new JButton("COPIAR A UN FICHERO");
+		btnCopiarAUn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controladorImplementacion.guardarTabla();
+			}
+		});
+		
+		btnBorrarTodo = new JButton("BORRAR TODO");
+		btnBorrarTodo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controladorImplementacion.borrarTodosAlumnos();
+			}
+		});
+		
+		btnSubirDelFichero = new JButton("SUBIR DEL FICHERO A LA BBDD");
+		btnSubirDelFichero.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				controladorImplementacion.subirFichero();
+			}
+		});
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane.setHorizontalGroup(
 			gl_contentPane.createParallelGroup(Alignment.LEADING)
@@ -167,14 +191,8 @@ public class VAlumnos extends JFrame implements Vista {
 					.addContainerGap()
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addComponent(lblAlumnos)
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 587, Short.MAX_VALUE)
+						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 614, Short.MAX_VALUE)
 						.addComponent(lblAadirAlumno)
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(btnAadir)
-							.addGap(18)
-							.addComponent(btnBorrar, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE)
-							.addGap(18)
-							.addComponent(btnActualizar))
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING, false)
 								.addComponent(lblApellido, GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
@@ -193,8 +211,21 @@ public class VAlumnos extends JFrame implements Vista {
 								.addComponent(txtDNI, GroupLayout.PREFERRED_SIZE, 179, GroupLayout.PREFERRED_SIZE))
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-								.addComponent(txtTelefono, GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
-								.addComponent(comboBoxNacionalidad, 0, 237, Short.MAX_VALUE))))
+								.addComponent(txtTelefono, GroupLayout.DEFAULT_SIZE, 264, Short.MAX_VALUE)
+								.addComponent(comboBoxNacionalidad, 0, 264, Short.MAX_VALUE)))
+						.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
+							.addComponent(btnAadir)
+							.addGap(18)
+							.addComponent(btnBorrar, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE)
+							.addGap(18)
+							.addComponent(btnActualizar)
+							.addPreferredGap(ComponentPlacement.RELATED, 54, Short.MAX_VALUE)
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING, false)
+								.addComponent(btnSubirDelFichero, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+								.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
+									.addComponent(btnBorrarTodo)
+									.addGap(18)
+									.addComponent(btnCopiarAUn)))))
 					.addContainerGap())
 		);
 		gl_contentPane.setVerticalGroup(
@@ -222,11 +253,15 @@ public class VAlumnos extends JFrame implements Vista {
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblDni)
 						.addComponent(txtDNI, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED, 62, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
+					.addComponent(btnSubirDelFichero)
+					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 						.addComponent(btnAadir)
 						.addComponent(btnBorrar)
-						.addComponent(btnActualizar))
+						.addComponent(btnActualizar)
+						.addComponent(btnBorrarTodo)
+						.addComponent(btnCopiarAUn))
 					.addContainerGap())
 		);
 
@@ -285,6 +320,7 @@ public class VAlumnos extends JFrame implements Vista {
 	}
 
 	public void actualizarTabla() {
+		System.out.println("borrar");
 		controladorImplementacion.crearTablaAlumnos();
 		
 	}
@@ -296,5 +332,4 @@ public class VAlumnos extends JFrame implements Vista {
 		comboBoxNacionalidad.setSelectedItem(modeloImplementacion.getNacionalidad());
 		txtTelefono.setText(modeloImplementacion.getTelefono());
 	}
-	
 }

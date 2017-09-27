@@ -1,8 +1,11 @@
 package controlador;
 
+import java.io.File;
 import java.util.ArrayList;
 
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
 import modelo.MImplementacion;
@@ -15,6 +18,9 @@ public class CImplementacion implements Controlador {
 	private MImplementacion modelo;
 	private VAlumnos vistaAlumnos;
 	private String cod;
+	JFileChooser explorador;
+	File archivo;
+	String ruta;
 
 	public void getBBDD() {
 		modelo.ConexionBBDD();
@@ -43,18 +49,30 @@ public class CImplementacion implements Controlador {
 	}
 
 	public void crearTablaAlumnos() {
+		System.out.println("creando tabla");
 		ArrayList<String[]> resultadosAlumnos = modelo.recogerDatosBBDD();
 		String[][] alumnos = new String[resultadosAlumnos.size()][6];
-		for (int i = 0; i < resultadosAlumnos.size(); i++) {
-			alumnos[i] = resultadosAlumnos.get(i);
-			for (int e = 0; e < resultadosAlumnos.get(i).length; e++) {
-				this.vistaAlumnos.getTable().setModel(new DefaultTableModel(alumnos,
-						new String[] { "COD", "DNI", "NOMBRE", "APELLIDO", "NACIONALIDAD", "TELEFONO" }));
+		
+		System.out.println("el size es" + resultadosAlumnos.size());
+		
+		
+		if(resultadosAlumnos.size()==0){
+			DefaultTableModel model= (DefaultTableModel)vistaAlumnos.getTable().getModel();
+			model.setRowCount(0);
+		}else{
+			for (int i = 0; i < resultadosAlumnos.size(); i++) {
+				alumnos[i] = resultadosAlumnos.get(i);
+				for (int e = 0; e < resultadosAlumnos.get(i).length; e++) {
+					this.vistaAlumnos.getTable().setModel(new DefaultTableModel(alumnos,
+							new String[] { "COD", "DNI", "NOMBRE", "APELLIDO", "NACIONALIDAD", "TELEFONO" }));
+
+				}
 
 			}
-
+			
 		}
-
+		
+		
 	}
 
 	public void generarError() {
@@ -91,5 +109,48 @@ public class CImplementacion implements Controlador {
 		
 	}
 
+	public void guardarTabla() {
+		modelo.gurdarTabla();
+		JOptionPane.showMessageDialog(null, "Los ficheros han sido salvados a un fichero txt.");
+		
+		
+	}
 
+	public void borrarTodosAlumnos() {
+		modelo.borrarTodosAlumnos();  
+		
+	}
+	
+	public void subirFichero() {
+		explorador = new JFileChooser("conexionBBDD.ini");
+		explorador.setDialogTitle("Abrir documento...");
+		explorador.setFileFilter(new FileNameExtensionFilter("TXT - Microsoft", "txt"));
+		//Muestro un dialogo sin pasarle parent con el boton de abrir
+		int seleccion = explorador.showDialog(null, "Abrir!");
+		  
+		//analizamos la respuesta
+		switch(seleccion) {
+		case JFileChooser.APPROVE_OPTION:
+		 //seleccionó abrir
+		 break;
+
+		case JFileChooser.CANCEL_OPTION:
+		 //dio click en cancelar o cerro la ventana
+		 break;
+
+		case JFileChooser.ERROR_OPTION:
+		 //llega aqui si sucede un error
+		 break;
+		}
+	
+
+	
+	//Podemos crear un File con lo seleccionado
+	archivo = explorador.getSelectedFile();
+
+	//y guardar una ruta
+	ruta = archivo.getPath();
+	System.out.println(ruta);
+	modelo.subirAlumnosFichero(ruta);
+	}
 }

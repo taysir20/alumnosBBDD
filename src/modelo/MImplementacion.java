@@ -1,8 +1,12 @@
 package modelo;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,6 +29,10 @@ import vista.Vista;
 public class MImplementacion implements Modelo {
 	private VAlumnos vistaAlumnos;
 	private Connection conexion;
+	Properties propiedades = new Properties();
+	InputStream entrada = null;
+	FileReader fr;
+	BufferedReader br;
 	private String Usuario;
 	private String Pass;
 	private String bbdd;
@@ -83,6 +91,7 @@ public class MImplementacion implements Modelo {
 
 	public ArrayList<String[]> recogerDatosBBDD() {
 		ArrayList<String[]> resultados = new ArrayList<String[]>();
+		int z = 0;
 		try {
 			if (conexion == null) {
 				System.out.println("NO EXISTE");
@@ -93,6 +102,7 @@ public class MImplementacion implements Modelo {
 			ResultSetMetaData rsmd = rset.getMetaData();
 
 			while (rset.next()) {
+
 				String fila[] = new String[rsmd.getColumnCount()];
 				fila[0] = rset.getString("cod");
 				fila[1] = rset.getString("dni");
@@ -100,12 +110,14 @@ public class MImplementacion implements Modelo {
 				fila[3] = rset.getString("apellido");
 				fila[4] = rset.getString("nacionalidad");
 				fila[5] = rset.getString("telefono");
+				z++;
 				resultados.add(fila);
 			}
 
 		} catch (SQLException s) {
 			s.printStackTrace();
 		}
+		System.out.println("Tienes estos resultados: " + z);
 		return resultados;
 	}
 
@@ -117,6 +129,7 @@ public class MImplementacion implements Modelo {
 
 	public void actualizarAlumnos(String txtNombre, String txtApellido, String txtDNI, String comboBoxNacionalidad,
 			int txtTelefono) {
+		System.out.println(txtNombre + " " + txtApellido + " " + txtDNI + " " + comboBoxNacionalidad + " " + txtTelefono);
 		try {
 			PreparedStatement pstmt;
 			String query = "INSERT INTO `alumnos` (`dni`, `nombre`, `apellido`, `telefono`, `nacionalidad`) VALUES ( ?,?,?,?,? )";
@@ -129,7 +142,7 @@ public class MImplementacion implements Modelo {
 			if (pstmt.executeUpdate() == 1) {
 				JOptionPane.showMessageDialog(null, "Nuevo registro almacenado satisfactoriamente.");
 				vistaAlumnos.actualizarTabla();
-			}else{
+			} else {
 				JOptionPane.showMessageDialog(null, "Se ha producido un error, vuelva a intentarlo.");
 			}
 		} catch (SQLException e) {
@@ -139,7 +152,7 @@ public class MImplementacion implements Modelo {
 		}
 
 	}
-	
+
 	public void borrarRegistroBBDD(String cod) {
 		try {
 			if (conexion == null) {
@@ -150,7 +163,7 @@ public class MImplementacion implements Modelo {
 			if (pstmt.executeUpdate() == 1) {
 				JOptionPane.showMessageDialog(null, "Registro borrado satisfactoriamente.");
 				vistaAlumnos.actualizarTabla();
-			}else{
+			} else {
 				JOptionPane.showMessageDialog(null, "Se ha producido un error, vuelva a intentarlo.");
 			}
 
@@ -168,9 +181,7 @@ public class MImplementacion implements Modelo {
 				System.out.println("NO EXISTE");
 				System.exit(-1);
 			}
-			PreparedStatement pstmt = conexion.prepareStatement(
-					"SELECT * FROM alumnos WHERE alumnos.cod= "
-							+ cod);
+			PreparedStatement pstmt = conexion.prepareStatement("SELECT * FROM alumnos WHERE alumnos.cod= " + cod);
 			ResultSet rset = pstmt.executeQuery();
 
 			while (rset.next()) {
@@ -180,14 +191,13 @@ public class MImplementacion implements Modelo {
 				nacionalidad = rset.getString("nacionalidad");
 				telefono = rset.getString("telefono");
 			}
-			
 
 		} catch (SQLException s) {
 			s.printStackTrace();
 		}
 
 		this.vistaAlumnos.devolverDatosRegistro();
-		
+
 	}
 
 	public String getDni() {
@@ -233,12 +243,15 @@ public class MImplementacion implements Modelo {
 	public void actualizarRegistroBBDD(String txtDNI, String txtNombre, String txtApellido, String comboBoxNacionalidad,
 			int txtTelefono, String cod) {
 		try {
-			PreparedStatement pstmt = conexion.prepareStatement("UPDATE `alumnos` SET `dni` = '" + txtDNI + "', `nombre` = '"  + txtNombre + "', `apellido` = '"+txtApellido+"', `nacionalidad` = '"+comboBoxNacionalidad+"', `telefono` = '"+txtTelefono+"' WHERE `alumnos`.`cod` = '" + cod + "'");
-			pstmt.executeUpdate();        
+			PreparedStatement pstmt = conexion.prepareStatement("UPDATE `alumnos` SET `dni` = '" + txtDNI.toUpperCase()
+					+ "', `nombre` = '" + txtNombre.toUpperCase() + "', `apellido` = '" + txtApellido.toUpperCase()
+					+ "', `nacionalidad` = '" + comboBoxNacionalidad.toUpperCase() + "', `telefono` = '" + txtTelefono
+					+ "' WHERE `alumnos`.`cod` = '" + cod + "'");
+			pstmt.executeUpdate();
 			if (pstmt.executeUpdate() == 1) {
 				JOptionPane.showMessageDialog(null, "Registro actualizado satisfactoriamente.");
 				vistaAlumnos.actualizarTabla();
-			}else{
+			} else {
 				JOptionPane.showMessageDialog(null, "Se ha producido un error, vuelva a intentarlo.");
 			}
 		} catch (SQLException e) {
@@ -249,5 +262,100 @@ public class MImplementacion implements Modelo {
 
 		vistaAlumnos.actualizarTabla();
 	}
-		
+
+	public void gurdarTabla() {
+		try {
+
+			String sucursalesCSVFile = "src/archivos/DatosTabla.txt";
+			BufferedWriter bfw = new BufferedWriter(new FileWriter(sucursalesCSVFile));
+
+			for (int i = 0; i < vistaAlumnos.getTable().getRowCount(); i++) // realiza
+																			// un
+																			// barrido
+																			// por
+																			// filas.
+			{
+				for (int j = 0; j < vistaAlumnos.getTable().getColumnCount(); j++) // realiza
+																					// un
+																					// barrido
+																					// por
+																					// columnas.
+				{
+					bfw.write((String) (vistaAlumnos.getTable().getValueAt(i, j)));
+					if (j < vistaAlumnos.getTable().getColumnCount() - 1) { // agrega
+																			// separador
+																			// ","
+																			// si
+																			// no
+																			// es
+																			// el
+																			// ultimo
+																			// elemento
+																			// de
+																			// la
+																			// fila.
+						bfw.write("-");
+					}
+				}
+				bfw.newLine(); // inserta nueva linea.
+			}
+
+			bfw.close(); // cierra archivo!
+			System.out.println("El archivo fue salvado correctamente!");
+		} catch (IOException e) {
+			System.out.println("ERROR: Ocurrio un problema al salvar el archivo!" + e.getMessage());
+		}
+
+	}
+
+	public void borrarTodosAlumnos() {
+		try {
+			if (conexion == null) {
+				System.out.println("NO EXISTE");
+				System.exit(-1);
+			}
+			PreparedStatement pstmt = conexion.prepareStatement("DELETE FROM `alumnos` ");
+
+			pstmt.executeUpdate();
+			System.out.println("borro en la bbdd");
+			JOptionPane.showMessageDialog(null, "Todos los registros serán borrados.");
+
+		} catch (SQLException s) {
+			s.printStackTrace();
+		}
+
+		vistaAlumnos.actualizarTabla();
+
+	}
+
+	public void subirAlumnosFichero(String ruta) {
+		try {
+			File miFichero = new File(ruta);
+			String[] lineaAlumno = null;
+			if (miFichero.exists()) {
+				fr=new FileReader(miFichero);
+				br= new BufferedReader(fr);
+				String alumno="";
+				while((alumno=br.readLine())!=null){
+					lineaAlumno=alumno.split("-");
+					actualizarAlumnos(lineaAlumno[2],lineaAlumno[3],lineaAlumno[1],lineaAlumno[4],Integer.parseInt(lineaAlumno[5]));
+				}
+			
+			} else
+				System.err.println("Fichero no encontrado");
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
+		finally {
+			if (entrada != null) {
+				try {
+					entrada.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 }
